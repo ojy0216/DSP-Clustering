@@ -8,6 +8,13 @@ N_TOTAL = 600
 N_CLUSTER = 6
 MAX_CLUSTER = 10
 
+
+def normalize(x):
+    max_x = np.max(x)
+    min_x = np.min(x)
+    return 2 / (max_x - min_x) * (x - min_x) - 1
+
+
 sample = [N_TOTAL // N_CLUSTER] * N_CLUSTER
 
 X, _ = make_blobs(sample)
@@ -34,8 +41,12 @@ grad = -np.gradient(np.log(sse))
 log_grad = np.log10(grad)
 
 optimal_k = 1
-for k, data in enumerate(log_grad):
-    if data < np.average(log_grad):
+# for k, data in enumerate(log_grad):
+#     if data < np.average(log_grad):
+#         optimal_k = k
+#         break
+for k, data in enumerate(normalize(log_grad)):
+    if data < 0:
         optimal_k = k
         break
 
@@ -70,9 +81,8 @@ ax4.set_title('Log of Normalized Sum of Squared distances of Samples (Log(SSE))'
 ax4.grid(alpha=0.5)
 ax4.set_xticks(range(1, MAX_CLUSTER + 1))
 
-ax5.plot(range(1, MAX_CLUSTER + 1), log_grad, marker='x')
-ax5.axhline(np.average(log_grad), color='orange')
-ax5.set_title('Log of Negative Gradient of Log(SSE)')
+ax5.plot(range(1, MAX_CLUSTER + 1), normalize(log_grad), marker='x')
+ax5.set_title('Log of Negative Gradient of Log(SSE)\nNormalized to [-1, 1]')
 ax5.set_xlabel("Optimal K: {}".format(optimal_k))
 ax5.grid(alpha=0.5)
 ax5.set_xticks(range(1, MAX_CLUSTER + 1))
